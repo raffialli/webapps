@@ -1,24 +1,60 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File</title>
+    <title>File Upload</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='friends_picture.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+        .upload-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            max-width: 400px;
+            margin: 5% auto;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload a File</h1>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flashes">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <form action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-    </form>
+    <div class="container">
+        <div class="upload-container">
+            <h2 class="text-center my-4">Upload a File</h2>
+            <div class="card p-4">
+                <form action="/" method="post" enctype="multipart/form-data">
+                    {% with messages = get_flashed_messages() %}
+                      {% if messages %}
+                        <div class="alert alert-info">
+                        {% for message in messages %}
+                          <p>{{ message }}</p>
+                        {% endfor %}
+                        </div>
+                      {% endif %}
+                    {% endwith %}
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" name="file" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Upload</button>
+                </form>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('list_files') }}" class="btn btn-info">View Uploaded Files</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and optional jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
