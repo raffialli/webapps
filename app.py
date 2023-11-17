@@ -24,8 +24,8 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # User model
 class User(UserMixin):
     id = 1
-    username = 'my'
-    password_hash = generate_password_hash('B@ll5!tch')
+    username = 'yeah'
+    password_hash = generate_password_hash('sure')
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
