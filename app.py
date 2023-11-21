@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, send_from_directory, flash, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import os
+import json
 
 # Allowed file extensions and maximum file size
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -21,11 +22,18 @@ login_manager.login_view = 'login'
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Function to load user data from JSON file
+def load_user_config():
+    with open(os.path.join('templates', 'users.json')) as file:
+        return json.load(file)
+
 # User model
 class User(UserMixin):
-    id = 1
-    username = 'my'
-    password_hash = generate_password_hash('B@ll5!tch')
+    def __init__(self, username):
+        self.id = username
+        self.username = username
+        user_config = load_user_config()
+        self.password_hash = user_config.get(username)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -33,7 +41,10 @@ class User(UserMixin):
 # User loader
 @login_manager.user_loader
 def load_user(user_id):
-    return User() if int(user_id) == 1 else None
+    user_config = load_user_config()
+    if user_id in user_config:
+        return User(user_id)
+    return None
 
 # Helper function to check allowed file types
 def allowed_file(filename):
@@ -45,8 +56,9 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == User().username and User().check_password(password):
-            login_user(User())
+        user_config = load_user_config()
+        if username in user_config and check_password_hash(user_config[username], password):
+            login_user(User(username))
             return redirect(url_for('upload_file'))
         else:
             flash('Invalid username or password')
