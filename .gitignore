@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables file
+.env
+
+# Docker files
+*.log
+*.pid
+*.lock
+
+# Kubernetes config
+secret.yaml
+pwhash.py
+
+# Virtual environment
+venv/

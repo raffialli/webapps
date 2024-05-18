@@ -1,16 +1,19 @@
 from flask import Flask, render_template, request, send_from_directory, flash, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import os
-import json
+
+# Load environment variables
+load_dotenv()
 
 # Allowed file extensions and maximum file size
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 MAX_FILE_SIZE = 16 * 1024 * 1024  # 16 MB
 
 app = Flask(__name__)
-app.secret_key = 'super secret key'  # Needed for flashing messages and Flask-Login
+app.secret_key = os.getenv('SECRET_KEY')  # Needed for flashing messages and Flask-Login
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
@@ -22,18 +25,12 @@ login_manager.login_view = 'login'
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Function to load user data from JSON file
-def load_user_config():
-    with open(os.path.join('templates', 'users.json')) as file:
-        return json.load(file)
-
 # User model
 class User(UserMixin):
     def __init__(self, username):
         self.id = username
         self.username = username
-        user_config = load_user_config()
-        self.password_hash = user_config.get(username)
+        self.password_hash = os.getenv('PASSWORD_HASH')
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -41,8 +38,7 @@ class User(UserMixin):
 # User loader
 @login_manager.user_loader
 def load_user(user_id):
-    user_config = load_user_config()
-    if user_id in user_config:
+    if user_id == os.getenv('USERNAME'):
         return User(user_id)
     return None
 
@@ -56,8 +52,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user_config = load_user_config()
-        if username in user_config and check_password_hash(user_config[username], password):
+        if username == os.getenv('USERNAME') and check_password_hash(os.getenv('PASSWORD_HASH'), password):
             login_user(User(username))
             return redirect(url_for('upload_file'))
         else:
